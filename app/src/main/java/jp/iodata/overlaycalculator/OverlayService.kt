@@ -7,11 +7,9 @@ import android.graphics.PixelFormat
 import android.os.Binder
 import android.os.Build
 import android.os.IBinder
-import android.view.Gravity
-import android.view.LayoutInflater
-import android.view.WindowManager
+import android.view.*
 import android.widget.Button
-import android.widget.FrameLayout
+import android.widget.TextView
 import timber.log.Timber
 
 
@@ -22,7 +20,13 @@ class OverlayService : Service() {
     }
 
     private val wm: WindowManager by lazy { applicationContext.getSystemService(Context.WINDOW_SERVICE) as WindowManager }
-    private val view: FrameLayout by lazy { LayoutInflater.from(this).inflate(R.layout.view_layout_overlay, null) as FrameLayout }
+    private val overlayView: DraggableLayout by lazy { LayoutInflater.from(this).inflate(R.layout.view_layout_overlay, null) as DraggableLayout }
+    private var currentX: Float = 0f   //Viewの左辺座標：X軸
+    private var currentY: Float = 0f   //Viewの上辺座標：Y軸
+    private var offsetX: Float = 0f    //画面タッチ位置の座標：X軸
+    private var offsetY: Float = 0f    //画面タッチ位置の座標：Y軸
+
+    private lateinit var answer: TextView
 
     override fun onBind(p0: Intent?): IBinder {
         Timber.d("onBind")
@@ -43,28 +47,33 @@ class OverlayService : Service() {
         }
 
         val params = WindowManager.LayoutParams(
-            WindowManager.LayoutParams.MATCH_PARENT,
+            WindowManager.LayoutParams.WRAP_CONTENT,
             WindowManager.LayoutParams.WRAP_CONTENT,
             overlayMode,
             WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
             PixelFormat.TRANSLUCENT)
             .also {
-                it.gravity = Gravity.BOTTOM or Gravity.START
+                it.gravity = Gravity.TOP or Gravity.START
             }
 
-        view.findViewById<Button>(R.id.btn_num0).setOnClickListener { onClickNum(0) }
-        view.findViewById<Button>(R.id.btn_num1).setOnClickListener { onClickNum(1) }
-        view.findViewById<Button>(R.id.btn_num2).setOnClickListener { onClickNum(2) }
-        view.findViewById<Button>(R.id.btn_num3).setOnClickListener { onClickNum(3) }
-        view.findViewById<Button>(R.id.btn_num4).setOnClickListener { onClickNum(4) }
-        view.findViewById<Button>(R.id.btn_num5).setOnClickListener { onClickNum(5) }
-        view.findViewById<Button>(R.id.btn_num6).setOnClickListener { onClickNum(6) }
-        view.findViewById<Button>(R.id.btn_num7).setOnClickListener { onClickNum(7) }
-        view.findViewById<Button>(R.id.btn_num8).setOnClickListener { onClickNum(8) }
-        view.findViewById<Button>(R.id.btn_num9).setOnClickListener { onClickNum(9) }
+        overlayView.setOnTouchListener { view, motionEvent ->
+            return@setOnTouchListener overlayTouchListener(view, motionEvent, params)
+        }
+
+        answer = overlayView.findViewById(R.id.tv_answer)
+        overlayView.findViewById<Button>(R.id.btn_num0).setOnClickListener { onClickNum(0) }
+        overlayView.findViewById<Button>(R.id.btn_num1).setOnClickListener { onClickNum(1) }
+        overlayView.findViewById<Button>(R.id.btn_num2).setOnClickListener { onClickNum(2) }
+        overlayView.findViewById<Button>(R.id.btn_num3).setOnClickListener { onClickNum(3) }
+        overlayView.findViewById<Button>(R.id.btn_num4).setOnClickListener { onClickNum(4) }
+        overlayView.findViewById<Button>(R.id.btn_num5).setOnClickListener { onClickNum(5) }
+        overlayView.findViewById<Button>(R.id.btn_num6).setOnClickListener { onClickNum(6) }
+        overlayView.findViewById<Button>(R.id.btn_num7).setOnClickListener { onClickNum(7) }
+        overlayView.findViewById<Button>(R.id.btn_num8).setOnClickListener { onClickNum(8) }
+        overlayView.findViewById<Button>(R.id.btn_num9).setOnClickListener { onClickNum(9) }
 
         try {
-            wm.addView(view, params)
+            wm.addView(overlayView, params)
         } catch (e: Exception) {
             Timber.w(e)
         }
@@ -74,11 +83,44 @@ class OverlayService : Service() {
 
     private fun onClickNum(num: Int) {
         Timber.d("onClick: $num")
+        val current = "${answer.text.toString().replace(",", "")}$num"
+        answer.text = "%,d".format(current.toLong())
+    }
+
+    private fun overlayTouchListener(view: View, event: MotionEvent, params: WindowManager.LayoutParams): Boolean {
+        val x = event.rawX
+        val y = event.rawY
+
+        when (event.action) {
+            MotionEvent.ACTION_DOWN -> {
+                //x,yセット
+                (view.layoutParams as WindowManager.LayoutParams).let {
+                    currentX = it.x.toFloat()
+                    currentY = it.y.toFloat()
+                }
+                offsetX = x
+                offsetY = y
+            }
+            MotionEvent.ACTION_MOVE -> {
+                var diffX = offsetX - x
+                var diffY = offsetY - y
+
+                currentX -= diffX
+                currentY -= diffY
+                offsetX = x
+                offsetY = y
+
+                params.x = currentX.toInt()
+                params.y = currentY.toInt()
+                wm.updateViewLayout(overlayView, params)
+            }
+        }
+        return true
     }
 
     override fun onDestroy() {
         super.onDestroy()
         Timber.d("onDestroy !!!!!!")
-        wm.removeView(view)
+        wm.removeView(overlayView)
     }
 }

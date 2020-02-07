@@ -17,6 +17,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private lateinit var btnStart: Button
+    private lateinit var btnEnd: Button
 
     private fun Activity.hasOverlayPermission(): Boolean =
         if (Build.VERSION.SDK_INT >= 23) Settings.canDrawOverlays(this) else true
@@ -40,6 +41,11 @@ class MainActivity : AppCompatActivity() {
             } else {
                 requestOverlayPermission(REQUEST_OVERLAY_PERMISSION_1)
             }
+        }
+
+        btnEnd = findViewById(R.id.btn_end)
+        btnEnd.setOnClickListener {
+
         }
     }
 

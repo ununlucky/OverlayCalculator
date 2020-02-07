@@ -1,23 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout
-	xmlns:android="http://schemas.android.com/apk/res/android"
-	xmlns:app="http://schemas.android.com/apk/res-auto"
-	xmlns:tools="http://schemas.android.com/tools"
-	android:layout_width="match_parent"
-	android:layout_height="match_parent">
-
-	<androidx.constraintlayout.widget.ConstraintLayout
+	<jp.iodata.overlaycalculator.DraggableLayout
+		xmlns:android="http://schemas.android.com/apk/res/android"
+		xmlns:app="http://schemas.android.com/apk/res-auto"
+		xmlns:tools="http://schemas.android.com/tools"
 		android:layout_width="wrap_content"
 		android:layout_height="wrap_content"
 		android:background="#5393"
-		android:focusable="false"
-		android:clickable="false">
+		android:focusableInTouchMode="true"
+		android:focusable="true"
+		android:clickable="true">
 
 		<TextView
 			android:id="@+id/tv_answer"
 			android:layout_width="0dp"
 			android:layout_height="wrap_content"
-			android:text="ANS"
+			android:text=""
+			android:textSize="24sp"
 			android:gravity="end"
 			android:layout_margin="8dp"
 			app:layout_constraintEnd_toEndOf="parent"
@@ -144,6 +142,16 @@
 			app:layout_constraintStart_toEndOf="@+id/btn_num5"
 			app:layout_constraintTop_toBottomOf="@+id/tv_answer" />
 
+		<ImageButton
+			android:id="@+id/btn_back"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:src="@drawable/ic_backspace"
+			app:layout_constraintEnd_toEndOf="parent"
+			app:layout_constraintStart_toEndOf="@+id/btn_num9"
+			app:layout_constraintTop_toBottomOf="@+id/tv_answer"
+			app:layout_constraintBottom_toTopOf="@+id/btn_div" />
+
 		<Button
 			android:id="@+id/btn_div"
 			android:layout_width="wrap_content"
@@ -152,7 +160,7 @@
 			app:layout_constraintBottom_toTopOf="@+id/btn_multi"
 			app:layout_constraintEnd_toEndOf="parent"
 			app:layout_constraintStart_toEndOf="@+id/btn_num9"
-			app:layout_constraintTop_toBottomOf="@+id/tv_answer" />
+			app:layout_constraintTop_toBottomOf="@+id/btn_back" />
 
 		<Button
 			android:id="@+id/btn_multi"
@@ -184,5 +192,4 @@
 			app:layout_constraintStart_toEndOf="@+id/btn_equal"
 			app:layout_constraintTop_toBottomOf="@+id/btn_minus"/>
 
-	</androidx.constraintlayout.widget.ConstraintLayout>
-</FrameLayout>
+	</jp.iodata.overlaycalculator.DraggableLayout>
